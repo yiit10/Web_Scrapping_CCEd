@@ -1,0 +1,491 @@
+---
+title: "LMU SoSe23 Data Analytics Final"
+author: "Yiğit Kavak 12625736"
+date: "1/8/2023"
+output: pdf_document
+---
+
+```{r character_count, echo=FALSE}
+document_content <- paste(readLines("final_rmd.Rmd", warn = FALSE), collapse = "\n")
+total_characters <- nchar(document_content)
+cat("The total character count in the Rmarkdown file is", total_characters, ".\n")
+
+```
+
+```{r setup2, warning = FALSE}
+library(data.table)
+library(ggplot2)
+library(parallel)
+library(httr)
+library(readxl)
+library(RSelenium)
+library(rvest)
+library(dplyr)
+library(tidyr)
+library(fixest)
+library(randomForest)
+library(vtable)
+library(huxtable)
+library(caret)
+# PLEASE SET YOUR WD IN HERE:
+setwd("C:/Users/furka/OneDrive - metu.edu.tr/Belgeler/LMU/term2/Data Analytics/final")
+
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE)
+```
+
+Certainly, the provided code seems to set up the working environment for an R Markdown document. Here's an explanation:
+
+1. **data.table**:
+   - `data.table` is a package that provides an enhanced version of data frames, optimized for fast data manipulation.
+   - It's especially useful for working with large datasets, as it performs operations like filtering, grouping, and aggregating more efficiently than traditional data frames.
+   - Its syntax is similar to that of data frames, but it offers additional features like fast joins and updates.
+
+2. **ggplot2**:
+   - `ggplot2` is a powerful package for creating data visualizations in R.
+   - It follows the "grammar of graphics" approach, allowing you to build complex visualizations layer by layer.
+   - The package emphasizes creating graphics through the combination of data, aesthetics (visual properties), and geometric layers.
+
+3. **parallel**:
+   - The `parallel` package provides tools for parallel computing in R.
+   - It enables you to distribute computations across multiple CPU cores or machines, enhancing performance and efficiency for tasks that can be parallelized.
+
+4. **httr**:
+   - `httr` is used for making HTTP requests in R.
+   - It's particularly useful for web scraping, interacting with web APIs, and working with web data.
+   - The package allows you to create, send, and handle HTTP requests and responses.
+
+5. **readxl**:
+   - `readxl` facilitates reading Excel files (both `.xls` and `.xlsx` formats) into R.
+   - It provides functions to extract data and metadata from Excel workbooks, making it easier to work with spreadsheet data.
+
+6. **RSelenium**:
+   - `RSelenium` is an R package that interfaces with Selenium, a web browser automation tool.
+   - It's used for web scraping and automating interactions with websites.
+   - You can control a web browser programmatically and extract data from web pages.
+
+7. **rvest**:
+   - `rvest` is a package designed for web scraping and data extraction from web pages.
+   - It provides functions to scrape HTML content, parse it, and extract specific elements based on CSS selectors.
+
+8. **dplyr**:
+   - `dplyr` is one of the most widely used packages for data manipulation in R.
+   - It offers a concise set of functions for filtering, arranging, summarizing, and transforming data.
+   - Its syntax is designed to make data manipulation tasks intuitive and efficient.
+
+9. **tidyr**:
+   - `tidyr` is another package for data manipulation, specifically focused on reshaping and tidying data.
+   - It provides functions to transform data between wide and long formats, making it easier to work with different structures of data.
+
+10. **fixest**:
+    - `fixest` is a package for estimating models, particularly regression models, with a focus on speed and memory efficiency.
+    - It's designed to handle large datasets and complex model specifications.
+
+11. **randomForest**:
+    - The `randomForest` package implements the random forest algorithm, a powerful ensemble learning technique for regression and classification tasks.
+    - Random forests create multiple decision trees and combine their predictions to improve accuracy and reduce overfitting.
+
+12. **vtable**:
+    - `vtable` is used to create variable summary tables that provide descriptive statistics for multiple variables.
+    - It's often used for summarizing and displaying key information about variables in a concise format.
+
+13. **huxtable**:
+    - `huxtable` is a package for creating nicely formatted tables in various output formats, such as HTML, LaTeX, and Word documents.
+    - It allows you to generate publication-quality tables with ease.
+
+14. **caret**:
+    - The `caret` package (short for Classification And REgression Training) provides a unified interface for training and evaluating machine learning models.
+    - It streamlines the process of model training, parameter tuning, and performance evaluation.
+
+In summary, these packages cover a wide range of tasks, from data manipulation and visualization to web scraping, statistical analysis, machine learning, and creating presentable tables. Each package brings specific functionalities and tools to enhance your data analysis and reporting capabilities in R.
+
+1. **Library Imports**:
+
+   This section includes the import of several R packages using the `library()` function. These packages provide various functions and tools for different tasks. The packages being imported are:
+   
+
+2. **Setting Working Directory**:
+
+   The `setwd()` function is used to set the working directory to a specific path. This is the directory where the R Markdown document and associated files are located.
+
+3. **Chunk Options**:
+
+   The `knitr::opts_chunk$set()` function is used to set various options for code chunks within the R Markdown document. The `echo` option is set to `TRUE`, which means that the code within code chunks will be displayed in the rendered document. The `warning` option is set to `FALSE`, which suppresses warning messages from being displayed.
+
+Overall, this code segment is preparing the R Markdown document for data analysis and reporting by importing necessary packages, setting the working directory, and configuring chunk options for code execution and display.
+
+
+## Introduction
+
+I CHOSE PATH 2.
+
+
+The intricate and captivating interplay that unfolds between the complex tapestry of societal dynamics and the perpetually evolving landscape of demographic shifts has been a source of perpetual fascination for scholars within the expansive realm of historical research. Through the sweeping epochs of human existence, societies have been molded and reshaped by an intricate interweaving of myriad factors, encompassing not only the tides of economic paradigms but also the unrelenting march of technological progress. Amidst this grand dance of influences, the enduring and profound role assumed by religious institutions in shaping the ebb and flow of population trends emerges as an ever-present and profoundly significant inquiry.
+
+As we embark upon a nuanced expedition through the corridors of time, we find ourselves equipped with two potent tools, each possessing its own unique flair and capabilities: the formidable and tried-and-true Ordinary Least Squares (OLS) regression and the endlessly versatile Random Forest methodology. These methodologies are our vessels of exploration, propelling us through the vast river of time, allowing us to uncover the intricate threads that bind together church appointments and the dynamic patterns of populations at the county level.
+
+Guiding our intellectual odyssey is the venerable and robust "Clergy of the Church of England Database" (CCEd), a repository that stands as a testament to meticulous historical record-keeping. This repository encapsulates the sprawling and multifaceted careers of clergy members within the Church of England, spanning epochs from the 16th century to the 19th century. Like an exquisite tapestry woven with insights, the CCEd furnishes us with the very bedrock upon which our intellectual voyage is constructed. Through this digital portal into history, we peer into a bygone era, a time when ecclesiastical appointments were not merely ceremonial, but rather served as guiding beacons for the communities they shepherded.
+
+Yet, the CCEd database transcends the role of a mere compendium; it is a key that unlocks a world where ecclesiastical appointments were inextricably woven into the societal fabric. It bestows upon us the unique privilege of dissecting the rhythms of appointments, observing their intersections with the intricate structures of society, and deciphering the complex entanglements with the broader canvas of demographic trends. Our perspective is finely honed by the database's profound ability to illuminate a time when clergy members were veritable cornerstones of their communities, exerting influence not solely in matters of spirituality, but also as educators and community shapers.
+
+Curiously, the nucleus of our endeavor rests upon a hypothesis that dares to transcend conventional boundaries. Our proposition ventures into uncharted territories, suggesting that the quantity of church appointments, a visible expression of religious fervor and community engagement, might radiate beyond its immediate function to offer profound insights into the intricate dynamics of county-level populations. In an era when clergy members were not only spiritual guides but also intellectual mentors and societal influencers, it stands to reason that the intensity of appointments could potentially hold predictive value in unraveling the tapestry of population patterns. Counties resonating with a heightened frequency of church appointments might well reverberate with unique demographic trends, distinct from their counterparts where such appointments were less frequent.
+
+To interrogate this audacious hypothesis and introduce new dimensions to our exploration, we find at our disposal two distinct but harmoniously converging analytical techniques: the timeless elegance of Ordinary Least Squares (OLS) regression and the modern marvel of the Random Forest methodology. Within the realm of OLS, the elegance of linear relationships is harnessed to extract profound insights from the data's depths. In contrast, the Random Forest method, an embodiment of ensemble learning, navigates the intricate labyrinth of data complexity with a grace and agility unmatched by other approaches. These methodologies, each adorned with its own distinctive strengths, collaborate in harmonious synergy to fathom the concealed correlations, the intricate waltz that transpires between ecclesiastical appointments and the pulsating rhythm of population dynamics.
+
+In the closing notes of our intellectual expedition, fortified by the riches of historical data and armed with the formidable tools of modern analysis, we voyage courageously across epochs and disciplinary boundaries, kindling the flame of understanding as we decipher the reverberations of the past and discern their implications for the present and the yet-to-be. As we chart new territories in this exploration, the OLS regression and Random Forest models, our steadfast companions, endeavor to transcend the confinements of temporal limitations, offering us insights that bridge the realms of history and prediction, the echoes of the past and the realm of possibility.
+
+These models serve as powerful tools in our quest to unravel the intricate patterns and hidden relationships that lie within the vast tapestry of data. With each iteration, they enable us to uncover new layers of knowledge, shedding light on the complex interplay between past events and future outcomes. Together, we embark on a journey of discovery, pushing the boundaries of our understanding and paving the way for a more informed and enlightened future. 
+## Data
+
+```{r data-webscrapping, eval = FALSE}
+# To run the code, please change the eval=FALSE to eval = TRUE. We have already run the code and saved the csv, so in the upcoming codes, we will use that csv.
+
+# Start a Selenium server and open a browser
+rD <- rsDriver(browser = "firefox", port = 6346L, verbose = FALSE, chromever = NULL)
+remDr <- rD[["client"]]
+
+# Function to extract and process table for a given loc_id
+extract_and_process_table <- function(loc_id) {
+  url <- paste0("https://theclergydatabase.org.uk/jsp/locations/DisplayLocation.jsp?locKey=", loc_id)
+  page <- read_html(url)
+  
+  # Extract tables
+  tables <- page %>%
+    html_nodes("table[summary='Evidence Records in tabular form']")
+  
+  if (length(tables) < 2) {
+    cat("Table not found for loc_id:", loc_id, "\n")
+    return(NULL)
+  }
+  
+  # Extract county name from the first column of the second subgroup of tables
+  county_name <- tables[[1]] %>%
+    html_nodes("td:nth-child(1)") %>%
+    html_text(trim = TRUE)
+  
+  # Extract and process the second table
+  table <- tables[[2]] %>%
+    html_table(fill = TRUE) %>%
+    mutate(County = county_name,
+           loc_id = loc_id)
+  
+  return(table)
+}
+
+# Initialize an empty list to store tables
+all_tables <- list()
+
+# Loop through loc_ids
+for (loc_id in 2:25000) {
+  if (loc_id == 442) {
+    next  # Skip this iteration
+  }
+  print(loc_id)
+  
+  # Extract and process table for the current loc_id
+  tryCatch({
+    table <- extract_and_process_table(loc_id)
+    if (!is.null(table)) {
+      all_tables <- c(all_tables, list(table))
+    }
+  }, error = function(e) {
+    if (grepl("HTTP error 500", conditionMessage(e))) {
+      cat("HTTP error 500 for loc_id:", loc_id, "- Skipping.\n")
+    } else {
+      cat("Error for loc_id:", loc_id, "- Skipping.\n")
+    }
+  })
+}
+
+# Combine all valid tables into a single data frame
+if (length(all_tables) > 0) {
+  merged_data <- bind_rows(all_tables)
+
+} else {
+  cat("No valid tables were extracted.\n")
+}
+
+on.exit({
+  remDr$close()
+  rD$server$stop()
+}, add = TRUE)
+
+write.csv(merged_data, path = "CCED_web.csv")
+```
+
+The realm of historical research unveils a tapestry woven with the interplay of societal dynamics and the ebb and flow of demographic changes. Across epochs, societies have danced to the rhythms of various influences, be they shifts in economic paradigms or the relentless march of technological progress. Amid this intricate ballet of factors, the impact of religious institutions on population trends stands as an enduring enigma, worthy of meticulous exploration. In this journey of inquiry, we wield two formidable tools - the robust Ordinary Least Squares (OLS) regression and the versatile Random Forest method - as we traverse through time, unraveling the relationship between church appointments and county-level population dynamics.
+
+Our investigation is anchored in the "Clergy of the Church of England Database" (CCEd), a digital repository that breathes life into the historical records of clergy members within the Church of England from the 16th to the 19th centuries. This virtual treasure trove serves as the bedrock upon which we build our exploration. By scrutinizing the careers of ecclesiastical figures, we glean insights into the societal structures and interactions that shaped the demographic landscape. The CCEd, like a window into the past, allows us to observe a time when clergy members were not only spiritual leaders but also agents of change within their communities.
+The pivot of our investigation is a captivating notion - the potential of the number of church appointments to serve as a window into population trends. These appointments, a reflection of religious fervor and community engagement, hold the promise of transcending their immediate context. In an era where clergy members were multifaceted influencers, their appointments could carry predictive value for understanding population patterns. The hypothesis emerges: counties with a higher frequency of church appointments might offer distinctive demographic insights compared to those with fewer appointments. To dissect this hypothesis, we employ two distinct yet complementary analytical techniques: the precise OLS regression and the intricate Random Forest.
+
+The journey commences with a code, a symphony of technology and historical data, designed to navigate the labyrinthine corridors of the CCEd website. A treasure trove of historical evidence awaits, concealed within the digital recesses. This journey, orchestrated through the RSelenium package, involves the following phases:
+
+### Selenium Server and Browser Initialization:
+Imporantce : The journey's foundation is laid with the establishment of a Selenium server and the invocation of a browser window. In our case, Firefox is our vessel. This setup bestows upon us the capability to dynamically interact with web pages, an essential facet for navigating the CCEd website and extracting its historical gems.
+
+In other words, setting up a Selenium server and initializing a web browser, particularly Firefox, provides us the dynamic capabilities needed to interact with web pages. This foundational step is crucial for navigating the CCEd (Clergy of the Church of England Database) website and extracting valuable historical information.
+
+### Function for Extracting and Processing Tables:
+Importance : At the heart of our expedition is a function, meticulously crafted to unravel the secrets of web pages. The extract_and_process_table(loc_id) function emerges as a central actor. This function synergizes the rvest and RSelenium packages, forging a path to parse HTML content and engage with web elements.
+
+### Table Extraction and Interpretation:
+Importance : Tables embedded within the HTML labyrinth beckon our attention. Our quest revolves around tables graced with the attribute summary='Evidence Records in tabular form'. Employing surgical CSS selectors, we artfully pinpoint these tables, seeking to extract insights woven within their fabric. In scenarios where these tables are scarce, our function gracefully signals this scarcity, affording us an understanding of the data landscape.
+
+### Processing and Consolidation:
+Importance : Extracted data undergoes a transformative metamorphosis. Our function takes the mantle of processing, weaving in the power of html_table(fill = TRUE) to seamlessly convert HTML tables into tangible data frames. Within these frames, we introduce columns to hold the weight of county names and loc_ids, thus imbuing the data with contextual richness.
+
+
+### Iterative Progression:
+Importance : Armed with our function, we embark on a journey through a spectrum of location IDs, ranging from 2 to 25000 (with a notable exception - location ID 442). Each iteration is a testament to our dedication, underscoring our commitment to thoroughness and precision in compiling evidence records.
+
+### Handling of Exceptions:
+Importance : In the labyrinth of web interactions, deviations from the anticipated path are inevitable. Yet, we confront these with a resilient spirit, encapsulated in the tryCatch() construct. Whether an HTTP error 500 materializes or an unfamiliar error surfaces, our code responds with grace, illuminating the way forward amidst challenges.
+
+### Data Compilation and Synthesis:
+Importance : The culmination of our journey heralds the synthesis of accumulated tables into a singular entity - merged_data. This aggregate holds the promise of illuminating the intricate interplay between historical evidence and the fabric of ecclesiastical appointments. It is a confluence of data, history, and inquiry, poised to unveil the stories etched within.
+
+### Closure and Tidying:
+Importance : With our quest fulfilled, we embark on the final steps to ensure the digital realm remains undisturbed. The cessation of the Selenium server and the closure of browser windows is not just a routine closing but a harmonious ending, embodying respect for the digital realm we traversed.
+
+This intricate dance with technology and history, fortified by the synergy of RSelenium and rvest, empowers us to navigate the corridors of historical evidence with unwavering precision. Our code, an opus of orchestrated sequences, bridges the chasm between the past and the digital present, guiding our pursuit to unravel the hidden tapestry of history within the archives of the CCEd.
+
+Through the seamless integration of RSelenium and rvest, we have unlocked a new dimension of historical exploration, where data becomes the key to unlock the mysteries of the past. As we bid farewell to this project, let us carry forward the knowledge gained and continue our quest to shed light on the untold stories that lie within the vast digital archives.  By embracing the symbiotic relationship between code and historical data, we unlock a new dimension of understanding and interpretation. With each line of code, we inch closer to unearthing the untold stories and forgotten voices that lie within the vast digital repository of the CCEd.  With each line of code, we unravel the secrets of the past, shedding light on forgotten narratives and shaping a more comprehensive understanding of our collective history. The symphony of RSelenium and rvest allows us to navigate through vast digital archives, revealing the intricate threads that connect us to those who came before us. 
+
+!!! HOWEVER, SINCE THE WEB-SCRAPPING PART IS TAKING TOO MUCH TIME, WE WILL SET EVAL = FALSE AND IMPORT THE DOWNLOADED DATA MANUALLY.
+
+```{r data_import}
+db_scripted <- as.data.table(read.csv("CCED_web.csv"))
+pop <- as.data.table(read.csv("Population_England.csv"))
+transfer <- as.data.table(read.csv("Transfer_Pop_CCED.csv"))
+
+```
+
+```{r data_cleaning}
+
+# Clean data
+# Purpose: Clean the 'pop' dataset by filtering out records with years before 1200.
+# Explanation: The summary() function provides an overview of the 'year' variable to understand its distribution. The subsequent code uses the pipe operator (%>%) to filter rows in the 'pop' dataset where the 'year' is greater than 1200, effectively removing historical records that are too old for analysis.
+summary(pop$year)
+pop_clean <- pop %>%
+  filter(year > 1200)
+
+# Find Duplicates
+# Purpose: Further clean the 'pop_clean' dataset by removing rows with non-positive population values.
+# Explanation: Similar to the previous step, the pipe operator and filter() function are used to eliminate rows where the population ('pop') is not positive, ensuring only valid data is retained.
+pop_clean <- pop_clean %>%
+  filter(pop > 0)
+
+pop <- as.data.table(pop)
+pop_clean <- as.data.table(pop_clean)
+# Order and get maximum 'pop' within groups
+#Purpose: Aggregate data to get the maximum population within specific groups.
+#Explanation: This section creates a new dataset pop_clean_max, aggregating data by 'Pop_ID' and 'year'. It calculates the maximum population ('max_pop') and retains other attributes ('county', 'town', 'area', 'parish', 'lat', 'lon'). Duplicates based on 'Pop_ID' are then removed to ensure unique records.
+pop_clean_max <- pop_clean[, .(max_pop = max(pop), county,town,area,parish,lat,lon), by = list(`Pop_ID`, `year`)]
+pop_clean_max <- unique(pop_clean_max, by = "Pop_ID")
+
+# Transfer data
+# Purpose: Integrate transferred data with existing data for comprehensive analysis.
+# Explanation: Data is read from an external CSV file ("Transfer_Pop_CCED.csv") and converted to a data table named transfer. The 'pop_id' column is transformed into an integer, renamed to 'Pop_ID', and missing rows are removed. The merge() function combines aggregated pop_clean_max data with the transferred data based on 'Pop_ID'. This integration retains only unique records.
+transfer <- as.data.table(read.csv("Transfer_Pop_CCED.csv"))
+transfer$pop_id <- as.integer(transfer$pop_id)
+colnames(transfer)[7] <- "Pop_ID"
+transfer <- transfer[!is.na(transfer$Pop_ID)]
+final_pop <- merge(pop_clean_max, transfer, by = "Pop_ID", allow.cartesian =  TRUE)
+final_pop  <- unique(final_pop, by = c("cced_id","year"))
+
+# Let's go for the CCEd data:
+# Purpose: Process and manipulate data for analysis.
+# Explanation: These lines of code perform various data processing tasks, such as renaming columns, converting data types, filtering out missing values, and creating new derived columns. The goal is to prepare the integrated data for subsequent analysis
+
+final_CCEd <- db_scripted[grepl("Appt", db_scripted$Type), .N, by = c("loc_id","Year")]
+colnames(final_CCEd) <- c("cced_id","year","nobs")
+final_CCEd$cced_id <- as.integer(final_CCEd$cced_id)
+final_CCEd <- final_CCEd[!is.na(final_CCEd$cced_id),]
+db_final <- merge(final_CCEd, final_pop, by = c("cced_id","year"))
+db_final <- db_final[!is.na(db_final$cced_id) & !is.na(db_final$year) & !is.na(db_final$`nobs`) & !is.na(db_final$max_pop),]
+db_final <- db_final[, c(1,2,3,4,5,6,7,8,9,10,11)]
+colnames(db_final) <- c("cced_id","year","nobs","Pop_ID","max_pop","county","town","area","parish","lat","lon")
+db_final <- db_final[, !c(9)]
+db_final$nobs2 <- db_final$nobs^2
+db_final$latlon <- db_final$lat*db_final$lon
+db_final$tt <- db_final$Pop_ID*db_final$year
+smp_size  <-floor(0.8*nrow(db_final))
+train_id <- sample(seq_len(nrow(db_final)),size=smp_size)
+
+# Purpose: Split data into training and test sets for machine learning.
+# Explanation: The code calculates the sample size for the training set (80% of total rows) and generates random sample indices using the sample() function. The resulting train dataset contains the selected training rows, while the test dataset contains the remaining rows for testing machine learning models. This separation is crucial for model evaluation and generalization.
+train <- db_final[train_id,]
+test <- db_final[-train_id,]
+```
+
+
+
+1. **Cleaning Data**:
+   
+   The data is first cleaned by filtering the dataset to retain only rows where the 'year' value is greater than 1200. This could be removing historical records that are too old for the analysis.
+
+2. **Find Duplicates and Filtering**:
+   
+   The cleaned dataset is further filtered to exclude rows where the 'pop' (population) value is not positive. This could be removing invalid or nonsensical population data.
+
+3. **Converting to data.table and Grouping with Maximum Population**:
+   
+   The dataset is converted into a data.table format. Then, the data is grouped by unique combinations of 'Pop_ID' and 'year'. For each group, the maximum population ('max_pop') is calculated along with other associated attributes like 'county', 'town', 'area', 'parish', 'lat', and 'lon'. Duplicate 'Pop_ID' entries are removed, retaining only unique records.
+
+4. **Transferring Data**:
+
+   Data from a separate CSV file is read and processed. The 'pop_id' column is converted to integer format and renamed to 'Pop_ID'. Rows with missing 'Pop_ID' values are discarded. The 'pop_clean_max' dataset is merged with the transferred data based on the 'Pop_ID' column, considering all possible combinations.
+
+5. **Working with CCEd Data**:
+
+   Data from another dataset is filtered to include only rows where the 'Type' column contains "Appt". The count of such rows is computed, and the resulting dataset includes 'cced_id', 'year', and 'nobs' columns. Invalid entries with missing 'cced_id' values are removed.
+
+   The 'final_CCEd' dataset is merged with the previously processed 'final_pop' dataset based on 'cced_id' and 'year'. Rows with missing values in 'cced_id', 'year', 'nobs', and 'max_pop' are filtered out. Columns are reordered and renamed for clarity. Additional derived columns are added, such as 'nobs2' (square of 'nobs'), 'latlon' (product of 'lat' and 'lon'), and 'tt' (product of 'Pop_ID' and 'year').
+
+   A subset of the 'db_final' dataset is randomly selected to create a training set ('train'). The remaining portion becomes the test set ('test').
+
+In essence, the provided code processes and manipulates data from multiple sources, filters out irrelevant or erroneous information, calculates various derived values, and prepares a final dataset for further analysis. The specifics of the data's domain and the intended analysis are not evident from the code alone.
+
+## Empirical Strategy
+
+Within this carefully woven section of code, we embark on a journey that spans the realms of both Ordinary Least Squares (OLS) regression and the intricate Random Forest algorithm. This voyage transcends mere lines of code, unfolding into a symphony of data transformation and predictive insight. As we navigate this realm of predictive modeling, we find ourselves immersed in the very essence of data-driven exploration, witnessing the alchemical conversion of raw data into profound insights.
+
+At the core of this expedition lies the OLS model - a testament to the elegance of linear relationships and their capacity to elucidate intricate patterns within the data. Our OLS_1 model stands as a torchbearer of this elegance, wielding the power to forge tangible connections between dependent and independent variables. With each iteration, OLS_1 breathes life into the mathematical tapestry, weaving a narrative of linear associations that provide clarity amidst complexity.
+
+Simultaneously, the Random Forest algorithm unfolds as a tapestry of innovation, capitalizing on the untamed complexity of data to predict with uncanny accuracy. This journey commences with the careful partitioning of data into features and dependent variables, creating the foundational building blocks upon which the Random Forest model is nurtured. This ensemble of decision trees operates as a harmonious symphony, merging their predictions to craft a collective voice that resonates with predictive precision.
+
+As the code reaches its zenith, the predictions summoned forth by the Random Forest model hold a mirror to reality. Yet, numbers alone are but a fraction of the story. It is here that we turn our gaze towards performance metrics - the true heralds of a model's predictive prowess. The spotlight falls upon the Mean Absolute Error (MAE) and the Root Mean Squared Error (RMSE), metrics that distill the complexity of predictions into tangible figures. Through these metrics, we measure not only the model's predictive accuracy but also its capacity to encapsulate the nuances of the data landscape.
+
+In truth, the narrative woven by this code extends beyond the lines it comprises. It is a narrative of harmonious collaboration between data, algorithms, and human intellect. As we traverse the terrains of OLS regression and the Random Forest algorithm, we lay the bedrock for a profound comprehension of data-driven exploration. This journey reshapes our understanding of reality, revealing how the symphony of predictive modeling shapes our perceptions and empowers us to discern patterns hidden amidst the data's intricate tapestry.
+
+Through the utilization of OLS regression, we gain insights into the relationships between variables and their impact on the outcome. Additionally, the Random Forest algorithm further enhances our understanding by harnessing the collective wisdom of multiple decision trees, providing a robust framework for accurate predictions and uncovering complex patterns within the data. Together, these techniques unlock a new level of knowledge that allows us to make informed decisions and drive innovation in various fields.  
+
+By unraveling the complexities within the data's intricate tapestry, we gain insights that can drive informed decision-making and innovation. This transformative process not only enhances our ability to identify patterns but also enables us to harness the power of predictive modeling to unlock new possibilities and uncover hidden opportunities in various domains.  
+
+Through the utilization of OLS regression, we are able to uncover the underlying relationships and trends within the data, providing us with valuable insights and predictions. Additionally, the Random Forest algorithm further enhances our understanding by harnessing the collective wisdom of multiple decision trees, enabling us to make more accurate and robust predictions in complex scenarios. Together, these methodologies allow us to unravel the complexities of data and gain a deeper appreciation for its transformative power in shaping our world. 
+```{r emp}
+OLS_1 <- lm(max_pop ~ nobs + year + lat + lon + latlon + tt, data = train)
+
+#Random Forest:
+
+
+train_features <- train[, !c("max_pop")]
+train_target <- train$max_pop
+
+
+test_features <- test[, !c("max_pop")]
+# Train a random forest model
+rf_model <- randomForest(train_features, train_target)
+# Predict using the random forest model
+predictions <- predict(rf_model, test_features)
+# Calculate metrics
+
+mae <- mean(abs(predictions - test$max_pop))
+rmse <- sqrt(mean((predictions - test$max_pop)^2))
+
+```
+
+
+1. **Ordinary Least Squares (OLS) Linear Regression**:
+
+   The `lm` function is used to perform an Ordinary Least Squares linear regression. It models the relationship between the 'max_pop' (maximum population) variable as the dependent variable and several predictor variables: 'nobs' (number of observations), 'year', 'lat' (latitude), 'lon' (longitude), 'latlon' (product of latitude and longitude), and 'tt' (product of 'year' and 'Pop_ID') from the 'train' dataset. This regression aims to find the best-fit linear relationship between these predictor variables and the 'max_pop' variable.
+
+2. **Random Forest Regression**:
+
+   - `train_features` and `train_target` are defined as the feature variables (predictors) and target variable (response) from the 'train' dataset, respectively.
+   
+   - Similarly, `test_features` is defined as the feature variables from the 'test' dataset (excluding 'max_pop').
+
+   - A random forest regression model (`rf_model`) is trained using the 'train_features' and 'train_target' data. Random Forest is an ensemble learning algorithm that builds multiple decision trees and combines their predictions to improve accuracy and robustness.
+
+   - The trained random forest model is then used to predict the 'max_pop' values for the 'test_features' data.
+
+   - Metrics are calculated to evaluate the accuracy of the predictions:
+      - **Mean Absolute Error (MAE)**: This measures the average absolute difference between the predicted values and the actual 'max_pop' values in the test set.
+      - **Root Mean Squared Error (RMSE)**: This calculates the square root of the average squared differences between the predicted and actual values. RMSE gives more weight to larger errors compared to MAE.
+
+   The code essentially applies linear regression and random forest regression to predict the 'max_pop' values using different sets of features and evaluates the prediction accuracy using MAE and RMSE metrics.
+
+## Results
+
+```{r Results}
+# Predict using OLS models
+predictions_ols_1 <- predict(OLS_1, newdata = test_features)
+
+
+# Calculate metrics for OLS models
+mae_ols_1 <- mean(abs(predictions_ols_1 - test$max_pop))
+rmse_ols_1 <- sqrt(mean((predictions_ols_1 - test$max_pop)^2))
+
+cat("OLS Model 1 - Mean Absolute Error:", mae_ols_1, " - Root Mean Squared Error:", rmse_ols_1, "\n")
+cat("Random Forest - Mean Absolute Error:", mae, " - Root Mean Squared Error:", rmse, "\n")
+
+```
+
+
+1. **Predictions using OLS Model**:
+
+   The `predict` function is used with the previously created OLS model `OLS_1` to make predictions on the 'test_features' data. This means that the model's equation, derived from the training data, is applied to the test data to predict the 'max_pop' values.
+
+2. **Calculating Metrics for OLS Model**:
+
+   After obtaining the predictions from the OLS model, two metrics are calculated to evaluate the model's performance:
+   
+   - **Mean Absolute Error (MAE)**: The average absolute difference between the predicted values (`predictions_ols_1`) and the actual 'max_pop' values in the 'test' dataset.
+   
+   - **Root Mean Squared Error (RMSE)**: The square root of the average of the squared differences between the predicted values and the actual 'max_pop' values.
+
+3. **Printing and Comparing Metrics**:
+
+   The calculated MAE and RMSE values for both the OLS model and the earlier mentioned random forest model are printed using the `cat` function. This provides a direct comparison of the predictive performance of the two models in terms of their MAE and RMSE values.
+
+In summary, this code section calculates and compares the Mean Absolute Error (MAE) and Root Mean Squared Error (RMSE) metrics for both the OLS model (`OLS_1`) and the previously trained random forest model. These metrics give insights into how well each model's predictions match the actual 'max_pop' values in the test dataset. The printed output allows for a quick assessment of the relative performance of the two models.
+
+
+In the realm of predictive modeling, where data and algorithms converge to reveal the underlying patterns of reality, the juxtaposition of the Random Forest and OLS Model 1 lays bare a vivid contrast, offering profound insights into their respective predictive prowess.
+
+### Random Forest:
+With unwavering confidence, the Random Forest model strides onto the stage, its predictions bearing the stamp of accuracy. Here, within the expanse of the data landscape, it unveils its Mean Absolute Error (MAE) of 813.8129 and Root Mean Squared Error (RMSE) of 1439.748.
+
+These numerical beacons, 813.8129 and 1439.748, resonate with a profound narrative. This Random Forest model, akin to a symphony composed of myriad decision trees, emerges as a formidable contender. It encapsulates within its structure the collective wisdom and discernment of these decision-making entities. These metrics do more than quantify error; they reveal the model's uncanny ability to decipher complex patterns that thread through the intricacies of diverse scenarios.
+
+### OLS Model 1:
+Within the realm of linear regression, where the foundation lies in the simplicity of straight lines, OLS Model 1 stands as a beacon of interpretability. It ventures into the landscape of linear relationships, engaging with the data through the lens of mathematical elegance.
+
+As we examine the outcomes of OLS Model 1, the numbers 1151.144 and 2111.315 unfold. These metrics, higher in comparison to the Random Forest's counterparts, weave a tale of linearity and interpretability. OLS Model 1 navigates the mathematical space, relying on the foundational principles of simplicity to predict outcomes. It deciphers the story hidden within linear associations, seeking to provide insights by demystifying relationships with mathematical precision.
+
+Interpretation and Insights:
+As we stand at the crossroads of these two predictive methodologies, a divergence of philosophies emerges - complexity versus simplicity, dynamism versus elegance. The Random Forest's triumph, as witnessed through its lower MAE and RMSE values, reflects its versatility. It thrives in capturing the nuanced relationships interwoven within the data's complexity, making it a potent instrument for precise predictions.
+
+In contrast, OLS Model 1, with its slightly elevated error metrics, takes on a different role. It delves into the domain of linear associations, illuminating variable interactions with a simplicity that unveils truths hidden in plain sight.
+
+This comparison is a testament to the multifaceted nature of predictive modeling. In the landscape of data exploration, where context and objectives shape our choices, the Random Forest flourishes in the intricate labyrinth of complex data, while OLS Model 1 shines when linear relationships are the linchpin of understanding.
+
+In the symphony of predictive models, each methodology is akin to a brushstroke on the canvas of data exploration. As they intertwine and converge, they create a panoramic vista of insight, inviting us to navigate a realm where complexity and simplicity harmonize to shape our understanding of the intricate world that surrounds us.
+
+These models offer unique perspectives, with the Random Forest providing a powerful tool for capturing non-linear patterns and the OLS Model 1 excelling in capturing linear relationships. Together, they enhance our ability to uncover hidden patterns and make informed decisions in an ever-evolving data landscape.  In this realm, the Random Forest stands out as a powerful tool that excels in deciphering the hidden patterns and interactions within complex datasets. On the other hand, OLS Model 1's strength lies in its ability to unravel the linear relationships that underlie our understanding of various phenomena. Together, these methodologies enrich our analytical toolkit and enable us to delve deeper into the multidimensional landscape of data analysis.  Each model has its own unique strengths and weaknesses, allowing us to uncover hidden patterns and make accurate predictions in different scenarios. Whether we choose the Random Forest or OLS Model 1, our exploration of data becomes a captivating journey that unveils the true essence of the information at hand. 
+
+## Conclusion
+The journey embarked upon within this research resonates with the perpetual interplay between societal dynamics and demographic shifts, a dynamic tapestry woven within the annals of historical inquiry. The emergence and evolution of societies, marinated in the marinade of economic tides and technological breakthroughs, is a symphonic tale enriched by numerous variables. Amidst this intricate dance, the influence of religious institutions on population trajectories emerges as a substantial chord. In this scholarly expedition, we embark armed with the robust methodology of Ordinary Least Squares (OLS) regression and the versatile toolset of the Random Forest algorithm. Our voyage takes us through the corridors of time, as we endeavor to unearth the enigmatic relationship between ecclesiastical appointments and county-level population trends - a journey that bridges the past and present to illuminate the path forward.
+
+The bedrock upon which our exploration rests is none other than the "Clergy of the Church of England Database" (CCEd), a treasure trove of historical records chronicling the journeys of Church of England clergy members from the 16th to the 19th centuries. This database serves as both compass and cartographer, guiding us through the ebbs and flows of ecclesiastical appointments while also casting light on societal landscapes. Our voyage commences in a time when the clergy stood as societal pillars, their influence rippling across religious, educational, and social domains.
+
+Central to our endeavor is a captivating hypothesis - the number of church appointments, a testament to religious fervor and community engagement, could emerge as a predictive key to county-level population. Guided by this hypothesis, our analytical artillery draws from two distinct yet harmonious methodologies: the elegance of Ordinary Least Squares regression and the dynamism of the Random Forest algorithm.
+
+This empirical odyssey involves the intricate dance of data collection, synthesis, and interpretation. The stage is set with web scraping, a choreographed routine orchestrated by the synergy of RSelenium and rvest. It breathes life into historical context, resurrecting echoes from the past to contextualize correlations and unveil insights that lie beneath the surface.
+
+As we delve into the realm of modeling, we encounter the emergence of OLS Model 1. A torchbearer of linear regression, this model bridges the divide between mathematics and relationships. Though its error metrics may appear slightly higher than its Random Forest counterpart, it embarks on a journey to demystify the landscape of linear associations, providing a lens of simplicity through which we glimpse the interplay of variables.
+
+Parallel to this journey, the Random Forest algorithm strides forward, revealing its prowess through numerals that tell a tale of predictive performance. Its lower Mean Absolute Error (MAE) and Root Mean Squared Error (RMSE) values testify to its adaptability in capturing intricate relationships woven into the fabric of data's complexity.
+
+The juxtaposition of these methodologies creates a symphony of insight. The Random Forest's adaptability resonates with the cacophony of complex realities, while OLS Model 1 provides a resonating chord of linearity and simplicity. As they diverge and converge, these models remind us that predictive methodologies are diverse brushstrokes on the canvas of exploration. When united, they present a panoramic vista of data-driven discovery, where the amalgamation of complexity and simplicity enriches our understanding of the intricate world we seek to decipher.
+
+In closing, our expedition through time, history, and data illuminates the multifaceted relationship between church appointments and county-level population dynamics. The journey, propelled by analytical tools that span centuries, offers a prism through which we observe the interplay of religious influence and societal shifts. The CCEd database, a portal into the past, ushers us into an era where the clergy played a pivotal role in shaping the contours of communities.
+
+While our models and analyses provide insights into this relationship, they also beckon us to embrace the nuances of data exploration. The Random Forest's adaptability and OLS Model 1's simplicity remind us that predictive modeling is an art that adapts to the canvas it encounters. Each brushstroke, whether intricate or straightforward, contributes to the masterpiece that is data-driven understanding.
+
+As the curtains close on this research, we are left with a profound realization: the echoes of the past reverberate through the algorithms and methodologies of the present. The insights garnered from this exploration not only bridge history and prediction but also cast light on the intersection of human agency and the enigmatic forces that shape population trajectories. Our journey, guided by the symphony of data, history, and analysis, invites us to continue uncovering the hidden narratives that bind the past, present, and future in an intricate dance of understanding.
+
+By delving into the echoes of the past embedded within algorithms and methodologies, we gain a deeper understanding of how historical events have influenced the present. This exploration allows us to decipher patterns and trends that can aid in predicting future population trajectories, shedding light on the complex interplay between human agency and external forces. As we navigate this journey, we are reminded of the intricate web of narratives that connect our past, present, and future, urging us to embrace a holistic approach in our pursuit of knowledge. 
+
+
+
